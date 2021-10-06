@@ -1,0 +1,80 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define BSW PORTEbits.RE2
+#define RSW PORTEbits.RE0
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l2 LATBbits.LATB2
+#define l3 LATBbits.LATB3
+
+char STMR[] = {0x08, 0x04, 0x02, 0x01};
+char STML[] = {0x01, 0x02, 0x04, 0x08};
+char  a,b,c,d,e,i,k,f;
+char Led7seg[] ={
+	0b10011100,
+	0b10100011,
+};
+
+void kousoku(void);
+void teisoku(void);
+void teishi(void);
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11001110;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	LATBbits.LATB0 = 1;
+	LATBbits.LATB1 = 1;
+	LATBbits.LATB2 = 1;
+	LATBbits.LATB3 = 1;
+	
+	while(1){
+		if(RSW == 0){
+			for(k=0;k<48;k++){
+				LATD = STML[i];
+				LATDbits.LATD7 = 0;
+				LATDbits.LATD7 = 1;
+				LATDbits.LATD7 = 0;
+				__delay_ms(10);
+				
+				i++;
+				if(i>3){
+					i=0;
+				}
+			}
+		}
+		
+		if(BSW == 0){
+			f=1;
+		}
+		if(BSW == 1 && f == 1){
+			for(a=0;a<96;a++){
+				LATD = STMR[c];
+				LATDbits.LATD7 = 0;
+				LATDbits.LATD7 = 1;
+				LATDbits.LATD7 = 0;
+				__delay_ms(10);
+				
+				c++;
+				if(c>3){
+					c=0;
+				}
+				
+				
+			}
+		}
+		f=0;
+	}
+}

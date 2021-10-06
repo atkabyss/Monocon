@@ -1,0 +1,148 @@
+#include <xc.h>
+
+#define _XTAL_FREQ 48000000
+
+#define l0 LATBbits.LATB0			//左の７セグメントLED
+#define l1 LATBbits.LATB1			//右の７セグメントLED
+#define l7 LATDbits.LATD7			//クロック
+#define RSW PORTEbits.RE0			//フォトIC
+#define TGSW PORTEbits.RE1			//トグルスイッチ
+#define BSW PORTEbits.RE2			//タクトスイッチ
+#define de __delay_ms				//ディレイ関数
+#define del __delay_us				//ディレイ関数(μ)
+#define l2 LATBbits.LATB2
+
+//定数の宣言
+char l7s[] ={			//７セグメントLED表示のデータ
+	~0b11000000,			//0
+	~0b11111001,			//1
+	~0b10100100,			//2
+	~0b10110000,			//3
+	~0b10011001,			//4
+	~0b10010010,			//5
+	~0b10000010,			//6
+	~0b11011000,			//7
+	~0b10000000,			//8
+	~0b10010000,			//9
+	~0b10100000,			//a---10
+	0b10000011,			//b---11
+	0b10100111,			//c---12
+	0b10100001,			//d---13
+	0b10000100,			//e---14
+	0b10001110,			//F---15
+	0b10011100,			//TSWOFF---16
+	0b10100011,			//TSWON---17
+};
+
+char STMR[] ={0x08,0x04,0x02,0x01};
+
+//変数の宣言＆初期化
+int a = 1,				//左の７セグメントLEDのデータ用
+	b = 5,				//右の７セグメントLEDのデータ用
+	c = 0,				//カウント用
+	i = 0,				//ステッピングモータ制御用
+	j = 0,				//未使用
+	k = 0,				//未使用
+	f = 0,				//フラグ用
+	f2 = 0,				//フラグ用
+	f3 = 0,				//フラグ用
+	num = 10;
+	
+//関数の宣言
+void set(void);				//PICの初期化
+void led(void);				//LEDをダイナミックドライブ表示させる関数
+void stmr(void);
+void dcmr(void);
+void dcms(void);
+
+/*=============================
+		メイン関数
+=============================*/
+
+void main(void){
+	set();				//PICの初期化
+		
+	while(1){			//永久ループ
+		for(c=0;c<50;c++){
+			LATD = l7s[a];
+			l0 = 0;
+			de(10);
+		}
+		
+		for(c=0;c<50;c++){
+			l0 = 1;
+			de(10);
+		}
+		
+		a++;
+		while(a == 5){
+			LATD = l7s[a];
+			l0 = 0;
+		}
+	}
+}
+
+void set(void){					//PICの初期化
+	ADCON1 |= 0x0F;				//ADコンバータOFF
+	
+	//入出力の設定
+	TRISA = 0b00000111;
+	TRISB = 0b00000000;
+	TRISC = 0b00000111;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	//ポートの初期化
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+
+	//７セグメントLEDをOFF
+	l0 = 1;
+	l1 = 1;
+}	
+
+void led(void){				//ダイナミックドライブ表示させる関数
+	LATD = l7s[a];			//左の７セグメントLEDのデータを読み込み
+	l0 = 0;					//左の７セグメントLEDを点灯
+	l1 = 1;					//右の７セグメントLEDを消灯
+	de(1);					//1ms
+	
+	LATD = l7s[b];			//右の７セグメントLEDのデータを読み込み
+	l0 = 1;					//左の７セグメントLEDを消灯
+	l1 = 0;					//右の７セグメントLEDを点灯
+	de(1);					//1ms
+}
+
+void stmr(void){
+	LATD = STMR[i];
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+	
+	i++;
+	if(i>3)i=0;
+}
+
+void stml(void){
+	
+}
+
+void dcmr(void){
+	LATD = 0b00010000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}
+
+void dcms(void){
+	LATD = 0b00110000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}

@@ -1,0 +1,103 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define BSW PORTEbits.RE2
+#define RSW PORTEbits.RE0
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l7 LATDbits.LATD7
+#define de __delay_ms
+
+char STMR[] = {0x08, 0x04, 0x02, 0x01};
+char STML[] = {0x01, 0x02, 0x04, 0x08};
+char  a,b,c,d,e,f,g,i,k,f;
+char l7s[] ={
+	0b11000000,
+	0b11111001,
+	0b10100100,
+	0b10110000,
+	0b10001000,
+};
+
+void kousoku(void);
+void teisoku(void);
+void teishi(void);
+void number(void);
+void stmr(void);
+void case1(void);
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11000000;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	LATBbits.LATB0 = 1;
+	LATBbits.LATB1 = 1;
+	LATBbits.LATB2 = 1;
+	LATBbits.LATB3 = 1;
+	
+	a = 1;
+	b = 0;
+	
+	while(1){
+		while(RSW == 0){
+			b++;
+			if(b>3){
+				b=0;
+			}
+			while(1){
+				number();
+				if(RSW == 1)break;
+			}
+		}
+		number();
+		
+		while(BSW == 0 && b == 0){
+			case1();
+		}
+	}
+}
+	
+void number(void){
+	LATD = l7s[a];
+	l0 = 0;
+	l1 = 1;
+	de(1);
+		
+	LATD = l7s[b];
+	l0 = 1;
+	l1 = 0;
+	de(1);
+}
+	
+void stmr(void){
+	LATD = STMR[i];
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(5);
+			
+	i++;
+	if(i>4){
+		i=0;
+	}
+}
+void case1(void){
+	LATD = l7s[4];
+	l0 = 1;
+	l1 = 0;
+	de(5);
+	l0 = 1;
+	l1 = 1;
+	stmr();
+}

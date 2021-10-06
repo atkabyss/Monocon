@@ -1,0 +1,229 @@
+#include <xc.h>
+
+#define _XTAL_FREQ 48000000
+
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l2 LATBbits.LATB2
+#define l7 LATDbits.LATD7
+#define BSW PORTEbits.RE0
+#define YSW PORTEbits.RE1
+#define de __delay_ms
+
+char STMR[] ={0x08,0x04,0x02,0x01};		//ステッピングモータを時計回りに回転させる関数
+char STML[] ={0x01,0x02,0x04,0x08};		//ステッピングモータを反時計回りに回転させる関数
+
+char l7s[] = {
+	0b11000000,		//0
+	0b11111001,		//1
+	0b10100100,		//2
+	0b10110000,		//3
+	0b10011001,		//4
+	0b10010010,		//5
+	0b10000010,		//6
+	0b11011000,		//7
+	0b10000000,		//8
+	0b10010000,		//9
+	0b10001000,		//A
+	0b10000011,		//B
+	0b11000110,		//C
+	0b10100001,		//D
+	0b10000110,		//E
+	0b10001110,		//F
+	0b11111111,
+	0b10001001,
+	0b11000111,
+	0b10111111,
+	0b10011100,		//20
+	0b10100011,		//21
+};
+int a = 0;
+	b = 0;
+	c = 0;
+	i = 0;
+	j = 0;
+	k = 0;
+	f = 0;
+	f2 = 0;
+	f3 = 0;
+
+void set(void);
+void led(void);
+void stmr(void);
+void stml(void);
+void dcmr(void);
+void dcml(void);
+void dcms(void);
+
+void main(void){
+	set();
+	
+	while(1){
+		led();
+		
+		if(BSW == 0 && f == 0){
+			i++;
+			f=1;
+			if(i>3)i=0;
+		}
+			
+		if(BSW == 1)f=0;
+		
+		switch(i){
+		case 0:
+			a=0;
+			b=0;
+			
+			break;
+			
+		case 1:
+			a=0;
+			b=1;
+			
+			break;
+			
+		case 2:
+			a=1;
+			b=0;
+			
+			break;
+		
+		case 3:
+			a=1;
+			b=1;
+			
+			break;
+		}
+		
+		while(i == 0 && YSW == 0){
+			LATD = l7s[0];
+			l0 = 1;
+			l1 = 0;
+			
+			de(10);
+			
+			l1 = 1;
+			
+			stmr();
+		}
+		
+		while(i == 1 && YSW == 0){
+			LATD = l7s[1];
+			l0 = 1;
+			l1 = 0;
+			
+			de(10);
+			
+			l1 = 1;
+			
+			dcmr();
+			if(YSW == 1)dcms();
+		}
+		
+		while(i == 2 && YSW == 0){
+			LATD = l7s[2];
+			l0 = 1;
+			l1 = 0;
+			
+			de(10);
+			
+			l1 = 1;
+			
+			stml();
+		}
+		
+		while(i == 3 && YSW == 0){
+			LATD = l7s[3];
+			l0 = 1;
+			l1 = 0;
+			
+			de(10);
+			
+			l1 = 1;
+			
+			dcml();
+			if(YSW == 1)dcms();
+		}
+	}
+}
+
+void set(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b00000111;
+	TRISB = 0b00000000;
+	TRISC = 0b00000111;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	l0 = 1;
+	l1 = 1;
+}
+
+void led(void){
+	LATD = l7s[a];
+	l0 = 0;
+	l1 = 1;
+	de(1);
+	
+	LATD = l7s[b];
+	l0 = 1;
+	l1 = 0;
+	de(1);
+}
+
+void stmr(void){			//ステッピングモータを時計回りに回転させる関数
+	LATD = STMR[k];	
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(5);					//5ms
+	
+	k++;					//iをカウントアップ
+	if(k>4){				//iが４以上になったら０に戻す
+		k=0;
+	}
+}
+
+void stml(void){			//ステッピングモータを反時計回りに回転させる関数
+	LATD = STML[k];
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(5);					//3ms
+	
+	k++;					//iをカウントアップ
+	if(k>4){				//iが４以上になったら０に戻す
+		k=0;
+	}
+}
+
+void dcmr(void){			
+	LATD = 0b00100000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}
+
+void dcml(void){
+	LATD = 0b00010000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}
+
+void dcms(void){
+	LATD = 0b00110000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}

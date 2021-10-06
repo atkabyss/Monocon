@@ -1,0 +1,163 @@
+#include <xc.h>
+
+#define _XTAL_FREQ	48000000
+
+#define l0 LATBbits.LATB0		//左の７セグメントLED
+#define l1 LATBbits.LATB1		//右の７セグメントLED
+#define l2 LATBbits.LATB2
+#define l7 LATDbits.LATD7 		//クロック
+#define BSW PORTEbits.RE0		//黒タクトスイッチ
+#define TSW PORTEbits.RE1		//トグルスイッチ
+#define RSW PORTEbits.RE2		//赤タクトスイッチ
+#define de __delay_ms
+
+//定数の宣言
+char l7s[] ={
+	0b11000000,		//0
+	0b11111001,		//1
+	0b10100100,		//2
+	0b10110000,		//3
+	0b10011001,		//4
+	0b10010010,		//5
+	0b10000010,		//6
+	0b11011000,		//7
+	0b10000000,		//8
+	0b10010000,		//9
+	0b10001000,		//A---10
+	0b10000011,		//b---11
+	0b11000110,		//C---12
+	0b10100001,		//d---13
+	0b10000110,		//E---14
+	0b10001110,		//F---15
+	0b10111111,		//----16
+};
+
+char STMR[] ={0x08,0x04,0x02,0x01};
+char STML[] ={0x01,0x02,0x04,0x08};
+
+//変数の宣言
+int a,b,c,i,j,k,f,f2,f3;
+
+//関数の宣言
+void set(void);
+void dcms(void);
+void dcmr(void);
+void stmr(void);
+
+void main(void){
+	set();
+	
+	while(1){
+		LATD = l7s[b];
+		l0 = 1;
+		l1 = 0;
+		
+		while(BSW == 1){
+			for(c=0;c<1000;c++){
+				LATD = l7s[b];
+				l1 = 0;
+				de(1);
+				if(BSW == 0)break;
+			}
+			
+			if(BSW == 0)continue;
+			b++;
+			if(b>3){
+				b=0;
+			}
+		}
+		
+		while(TSW == 0){
+			switch(b){
+			case 0:
+				l1 = 1;
+				
+				break;
+				
+			case 1:
+				LATD = 0b11111110;
+				l0 = 0;
+				l1 = 1;
+				
+				break;
+				
+			case 2:
+				LATD = 0b10111111;
+				l0 = 0;
+				l1 = 1;
+				
+				break;
+				
+			case 3:
+				LATD = 0b11110111;
+				l0 = 0;
+				l1 = 1;
+				
+				break;
+			}
+		}
+	}
+}
+
+void dcmr(void){
+	LATD = 0b00010000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}
+
+void dcms(void){
+	LATD = 0b00110000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(1);
+}
+
+void stmr(void){
+	LATD = STMR[i];
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+	de(5);
+	
+	i++;
+	if(i>4){
+		i=0;
+	}
+}
+	
+void set(void){
+	ADCON1 |= 0x0F;			//ADコンバータOFF
+	
+	//入出力の設定
+	TRISA = 0b00000111;		
+	TRISB = 0b00000000;
+	TRISC = 0b00000111;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	//ポートの初期化
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	//すべての７セグメントLEDをOFF
+	l0 = 1;
+	l1 = 1;
+	l2 = 1;
+	
+	//変数の初期化
+	a = 0;
+	b = 0;
+	c = 0;
+	i = 0;
+	j = 0;
+	k = 0;
+	f = 0;
+	f2 = 0;
+	f3 = 0;
+}

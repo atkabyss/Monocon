@@ -1,0 +1,154 @@
+#include <xc.h>
+
+#define _XTAL_FREQ 48000000
+
+#define l0 LATBbits.LATB0		//左の７セグメントLED
+#define l1 LATBbits.LATB1		//右の７セグメントLED
+#define l7 LATDbits.LATD7
+#define BSW PORTEbits.RE2 		//黒タクトスイッチ
+#define RSW PORTEbits.RE0		//赤タクトスイッチ
+#define de __delay_ms			//遅延
+
+//定数の宣言
+char l7s[] ={
+	0b10011100,
+	0b10100011,
+};
+
+//変数の宣言
+char a,b,c,d,i,j,k,f,f2,l;
+
+//関数の宣言
+void led(void);
+void dcmr(void);
+void dcml(void);
+void dcms(void);
+void teishi(void);
+
+
+void main(void){
+	//入出力設定
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11001110;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	//ポートの初期化
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	//７セグメントLEDの消灯
+	l0 = 1;
+	l1 = 1;
+	
+	//変数の初期化
+	a = 0;		//左の７セグメント用
+	b = 1;		//右の７セグメント用
+	c = 0;		//カウント用
+	i = 0;		//ステッピングモータ制御用
+	j = 0;		//ステッピングモータの回転数制御用
+	k = 0;		//for文用
+	f = 0;		//フラグ用
+	f2 = 0;		//フラグ用
+
+	LATD = l7s[a];
+	l0 = 0;
+	
+	
+	while(1){
+		if(BSW == 0){
+			f=1;
+		}
+		if(BSW == 1 && f == 1){
+			while(1){
+				if(RSW == 0)j=30;
+				if(RSW == 1)j=100;
+				LATD = l7s[a];
+				l0 = 0;
+				l1 = 1;
+				for(i=0;i<j;i++){
+					de(10);
+					teishi();
+				}
+		
+				if(RSW == 0)j=30;
+				if(RSW == 1)j=100;
+				LATD = l7s[a];
+				l0 = 1;
+				l1 = 0;
+				for(i=0;i<j;i++){
+					de(10);
+					teishi();
+				}
+			
+				if(RSW == 0)j=30;
+				if(RSW == 1)j=100;
+				LATD = l7s[b];
+				l0 = 1;
+				l1 = 0;
+				for(i=0;i<j;i++){
+					de(10);
+					teishi();
+				}
+			
+				if(RSW == 0)j=30;
+				if(RSW == 1)j=100;
+				LATD = l7s[b];
+				l0 = 0;
+				l1 = 1;
+				for(i=0;i<j;i++){
+					de(10);
+					teishi();
+				}
+			}
+		}	
+	}
+}
+
+
+void led(void){
+	LATD = l7s[a];
+	l0 = 0;
+	l1 = 1;
+	de(1);
+	
+	LATD = l7s[b];
+	l0 = 1;
+	l1 = 0;
+	de(1);
+}
+
+void dcmr(void){
+	LATD = 0b00100000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+}
+
+void dcml(void){
+	LATD = 0b00010000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+}
+
+void dcms(void){
+	LATD = 0b00110000;
+	l7 = 0;
+	l7 = 1;
+	l7 = 0;
+}
+
+void teishi(void){
+	if(BSW == 0)f2=1;
+	if(BSW == 1 && f2 == 1){
+		while(BSW == 1);
+		while(BSW == 0)f2=0;
+	}
+}

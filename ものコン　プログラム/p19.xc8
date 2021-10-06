@@ -1,0 +1,173 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define BSW PORTEbits.RE2
+#define RSW PORTEbits.RE0
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l7 LATDbits.LATD7
+#define de __delay_ms
+
+char STMR[] = {0x08, 0x04, 0x02, 0x01};
+char STML[] = {0x01, 0x02, 0x04, 0x08};
+char  a,b,c,d,e,f,g,i,k,f,j,f2;
+char l7sl[] ={
+	0b11111110,
+	0b11011111,
+	0b11101111,
+	0b11110111,
+	0b11111011,
+	0b11111101,
+};
+
+char l7sr[] ={
+	0b11111110,
+	0b11111101,
+	0b11111011,
+	0b11110111,
+	0b11101111,
+	0b11011111,
+};
+
+void kousoku(void);
+void teisoku(void);
+void stop(void);
+void number(void);
+void stmr(void);
+void case1(void);
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11000000;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	l0 = 1;
+	l1 = 1;
+	
+	a = 0;
+	b = 0;
+	c = 0;
+	d = 0;
+	e = 0;
+	f = 0;
+	g = 0;
+	i = 0;
+	k = 0;
+	f = 0;
+	
+	
+	while(1){
+		if(k == 0){
+			k=1;
+			for(i=0;i<100;i++){
+				LATD = l7sl[a];
+				l0 = 0;
+				l1 = 1;
+				de(5);
+			
+				LATD = l7sr[b];
+				l0 = 1;
+				l1 = 0;
+				de(5);
+			}
+		}
+			LATD = l7sl[a];
+			l0 = 0;
+			l1 = 1;
+			de(5);
+			
+			LATD = l7sr[b];
+			l0 = 1;
+			l1 = 0;
+			de(5);
+		
+		
+		if(RSW == 0){
+			while(1){
+				a++;
+				if(a>5){
+					a=0;
+				}
+			
+				b++;
+				if(b>5){
+					b=0;
+				}
+				if(BSW == 1)j=100;
+				if(BSW == 0)j=30;
+				for(i=0;i<j;i++){
+					LATD = l7sl[a];
+					l0 = 0;
+					l1 = 1;
+					de(5);
+			
+					LATD = l7sr[b];
+					l0 = 1;
+					l1 = 0;
+					de(5);	
+				}
+				
+				if(RSW == 0){
+					f=1;
+				}
+				
+				while(RSW == 1 && f == 1){
+					LATD = l7sl[a];
+					l0 = 0;
+					l1 = 1;
+					de(5);
+			
+					LATD = l7sr[b];
+					l0 = 1;
+					l1 = 0;
+					de(5);
+					
+					if(RSW == 0){
+						f=0;
+						for(i=0;i<100;i++){
+							LATD = l7sl[a];
+							l0 = 0;
+							l1 = 1;
+							de(5);
+			
+							LATD = l7sr[b];
+							l0 = 1;
+							l1 = 0;
+							de(5);
+						}
+						break;
+					}
+					
+				}
+			}
+		}
+	}
+}
+
+void stop(void){
+	if(RSW == 0)f2=1;
+	if(RSW == 1 && f2 == 1){
+		while(RSW == 1){
+			LATD = l7sl[a];
+			l0 = 0;
+			l1 = 1;
+			de(5);
+			
+			LATD = l7sr[b];
+			l0 = 1;
+			l1 = 0;
+			de(5);	
+			while(RSW == 0)f2=0;
+		}
+	}
+}

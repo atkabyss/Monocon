@@ -1,0 +1,62 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define l0 LATBbits.LATB0 
+#define l1 LATBbits.LATB1 
+#define l2 LATBbits.LATB2 
+#define l3  LATBbits.LATB3
+#define TG0 PORTEbits.RE0 
+
+int i,a;
+
+char Led7seg[] = {
+	0b01000000,
+	0b01111001,
+	0b00100100,
+	0b00110000,
+	0b00011001,
+	0b00010010,
+	0b00000010,
+	0b01111000,
+	0b00000000,
+	0b00011000,
+	0b00001000,
+	0b00000011,
+	0b01000110,
+	0b00100001,
+	0b00000110,
+	0b00001110,
+};
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11000000;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	l0 = 1;
+	l1 = 1;
+	l2 = 1;
+	l3 = 1;
+	
+	while(1){
+		for(i=0; i<16; i++){
+			LATD = Led7seg[i];
+			l3 = 0;
+			
+			for(a=0; a<100; a++){
+				__delay_ms(10);
+			}
+		}
+	}
+		
+}

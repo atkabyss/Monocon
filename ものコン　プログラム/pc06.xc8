@@ -1,0 +1,176 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define BSW PORTEbits.RE2
+#define RSW PORTEbits.RE0
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l2 LATBbits.LATB2
+#define l3 LATBbits.LATB3
+
+char STMR[] = {0x08, 0x04, 0x02, 0x01};
+char STML[] = {0x01, 0x02, 0x04, 0x08};
+char  a,b,i=0,k,f=0;
+char Led7seg[] ={
+	0b11000000,
+	0b11111001,
+	0b10100100,
+	0b10110000,
+};
+
+void teishi(void);
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11001110;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	LATBbits.LATB0 = 1;
+	LATBbits.LATB1 = 1;
+	LATBbits.LATB2 = 1;
+	LATBbits.LATB3 = 1;
+	
+	
+	
+	while(1){
+		while(RSW == 0){
+			 i++;
+			if(i>3){
+				i=0;
+			}
+			while(1){
+				LATD = Led7seg[1];
+				l0 = 0;
+				l1 = 1;
+				__delay_ms(10);
+			
+				LATD = Led7seg[i];
+				l0 = 1;
+				l1 = 0;
+				__delay_ms(10);
+				if(RSW == 1) break;
+			}
+		}
+			LATD = Led7seg[1];
+			l0 = 0;
+			l1 = 1;
+			__delay_ms(10);
+			
+			LATD = Led7seg[i];
+			l0 = 1;
+			l1 = 0;
+			__delay_ms(10);		
+		
+		while(BSW == 0 && i == 0){
+			LATD = 0b11111111;
+			l0 = 0;
+			l1 = 1;
+			__delay_ms(10);
+			
+			LATD = 0b10001000;
+			l0 = 1;
+			l1 = 0;
+			__delay_ms(10);
+			l0 = 1;
+			l1 = 1;
+			
+			LATD = STMR[a];
+			LATDbits.LATD7 = 0;
+			LATDbits.LATD7 = 1;
+			LATDbits.LATD7 = 0;
+			
+			a++;
+			if(a>4){
+				a=0;
+			}
+		}
+			while(BSW == 0 && i == 1){
+				LATD = 0b11111111;
+				l0 = 0;
+				l1 = 1;
+				__delay_ms(10);
+				
+				LATD = 0b10000011;
+				l0 = 1;
+				l1 = 0;
+				__delay_ms(10);
+				l0 = 1;
+				l1 = 1;
+			
+				LATD = STML[b];
+				LATDbits.LATD7 = 0;
+				LATDbits.LATD7 = 1;
+				LATDbits.LATD7 = 0;
+			
+				b++;
+				if(b>4){
+					b=0;
+				}
+			}
+			
+			while(BSW == 0 && i == 2){
+			LATD = 0b11111111;
+			l0 = 0;
+			l1 = 1;
+			__delay_ms(10);
+			
+			LATD = 0b11000110;
+			l0 = 1;
+			l1 = 0;
+			__delay_ms(10);
+			l0 = 1;
+			l1 = 1;
+			
+			LATD = 0b00010000;
+			LATDbits.LATD7 = 0;
+			LATDbits.LATD7 = 1;
+			LATDbits.LATD7 = 0;
+				__delay_ms(5);
+				
+			LATD = 0b00000000;
+			LATDbits.LATD7 = 0;
+			LATDbits.LATD7 = 1;
+			LATDbits.LATD7 = 0;	
+			}
+			
+			while(BSW == 0 && i == 3){
+			LATD = 0b11111111;
+			l0 = 0;
+			l1 = 1;
+			__delay_ms(10);
+			
+			LATD = 0b10100001;
+			l0 = 1;
+			l1 = 0;
+			__delay_ms(10);
+			l0 = 1;
+			l1 = 1;
+			
+			LATD = 0b00100000;
+			LATDbits.LATD7 = 0;
+			LATDbits.LATD7 = 1;
+			LATDbits.LATD7 = 0;
+				__delay_ms(5);
+				
+			LATD = 0b00000000;
+			LATDbits.LATD7 = 0;
+			LATDbits.LATD7 = 1;
+			LATDbits.LATD7 = 0;
+			}
+				
+		
+	}
+		
+}
+			
+		

@@ -1,0 +1,97 @@
+#include<xc.h>
+
+#define _XTAL_FREQ 48000000
+#define BSW PORTEbits.RE2
+#define RSW PORTEbits.RE0
+#define l0 LATBbits.LATB0
+#define l1 LATBbits.LATB1
+#define l2 LATBbits.LATB2
+#define l3 LATBbits.LATB3
+#define de __delay_ms
+
+char STMR[] = {0x08, 0x04, 0x02, 0x01};
+char STML[] = {0x01, 0x02, 0x04, 0x08};
+char  a=5,b,c,d,e,g,i,j=100,k=1,f,f2;
+char Led7seg[] ={
+	0b11111110,
+	0b11011111,
+	0b11101111,
+	0b11110111,
+	0b11111011,
+	0b11111101,
+};
+
+void kousoku(void);
+void teisoku(void);
+void teishi(void);
+
+void main(void){
+	ADCON1 |= 0x0F;
+	
+	TRISA = 0b11001110;
+	TRISB = 0b00000000;
+	TRISC = 0b11111100;
+	TRISD = 0b00000000;
+	TRISE = 0b00000111;
+	
+	PORTA = 0;
+	PORTB = 0;
+	PORTC = 0;
+	PORTD = 0;
+	PORTE = 0;
+	
+	LATBbits.LATB0 = 1;
+	LATBbits.LATB1 = 1;
+	LATBbits.LATB2 = 1;
+	LATBbits.LATB3 = 1;
+	
+	while(RSW == 1){
+		de(10);
+		LATD = Led7seg[0];
+		l0 = 0;
+		l1 = 0;
+		while(RSW == 0)break;
+		de(10);
+	}
+	
+	while(1){
+		for(i=0;i<j;i++){
+			if(BSW == 1 && f == 0) f=1;
+			if(BSW == 0 && f == 1) f=2;	
+			LATD = Led7seg[k];
+			l0 = 1;
+			l1 = 0;
+			de(1);
+			
+			LATD = Led7seg[a];
+			l0 = 0;
+			l1 = 1;
+			de(1);
+			
+			if(RSW == 1) j=100;
+			if(RSW == 0) j=10;
+			de(1);
+		}
+		
+		while(RSW == 1 && f == 2){
+			while(1){
+				LATD = Led7seg[k];
+				l0 = 1;
+				l1 = 0;
+				de(1);
+			
+				LATD = Led7seg[a];
+				l0 = 0;
+				l1 = 1;
+				de(1);
+				f=0;
+				if(BSW == 0)break;
+			}
+		}
+			
+		k++;
+		a--;
+		if(k>=6)k=0;
+		if(a<=-1)a=5;
+	}
+}
